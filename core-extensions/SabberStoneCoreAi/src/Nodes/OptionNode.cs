@@ -11,6 +11,7 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU Affero General Public License for more details.
 #endregion
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using SabberStoneCore.Enums;
@@ -117,7 +118,12 @@ namespace SabberStoneCoreAi.Nodes
 					option.Options(ref nextDepthNodes);
 				}
 
+				
 				endTurnNodes.AddRange(nextDepthNodes.Values.Where(p => p.IsEndTurn || !p.IsRunning));
+				foreach(OptionNode on in endTurnNodes)
+				{
+					Console.WriteLine("Options: " + on.ToString());
+				}
 
 				depthNodes = nextDepthNodes
 					.Where(p => !p.Value.IsEndTurn && p.Value.IsRunning)
