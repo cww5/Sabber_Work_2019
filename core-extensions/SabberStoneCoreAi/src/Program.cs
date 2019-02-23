@@ -35,8 +35,8 @@ namespace SabberStoneCoreAi
 			Console.WriteLine("Starting test setup.");
 
 			//OneTurn();
-			//FullGame();
-			RandomGames();
+			FullGame();
+			//RandomGames();
 			//TestFullGames();
 
 			Console.WriteLine("Test end!");
@@ -220,10 +220,10 @@ namespace SabberStoneCoreAi
 				new GameConfig()
 				{
 					StartPlayer = 1,
-					Player1Name = "FitzVonGerald",
+					Player1Name = "WARRIOR Player1",
 					Player1HeroClass = CardClass.WARRIOR,
 					Player1Deck = Decks.AggroPirateWarrior,
-					Player2Name = "RehHausZuckFuchs",
+					Player2Name = "WARRIOR Player2",
 					Player2HeroClass = CardClass.WARRIOR,
 					Player2Deck = Decks.AggroPirateWarrior,
 					FillDecks = false,
