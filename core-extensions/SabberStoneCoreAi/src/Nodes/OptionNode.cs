@@ -120,10 +120,6 @@ namespace SabberStoneCoreAi.Nodes
 
 				
 				endTurnNodes.AddRange(nextDepthNodes.Values.Where(p => p.IsEndTurn || !p.IsRunning));
-				foreach(OptionNode on in endTurnNodes)
-				{
-					Console.WriteLine("Options: " + on.ToString());
-				}
 
 				depthNodes = nextDepthNodes
 					.Where(p => !p.Value.IsEndTurn && p.Value.IsRunning)
@@ -131,7 +127,7 @@ namespace SabberStoneCoreAi.Nodes
 					.Take(maxWidth)
 					.ToDictionary(p => p.Key, p => p.Value);
 
-				//Console.WriteLine($"Depth: {i + 1} --> {depthNodes.Count}/{nextDepthNodes.Count} options! [SOLUTIONS:{endTurnNodes.Count}]");
+				Console.WriteLine($"Depth: {i + 1} --> {depthNodes.Count}/{nextDepthNodes.Count} options! [SOLUTIONS:{endTurnNodes.Count}]");
 			}
 			return endTurnNodes;
 		}
