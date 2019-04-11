@@ -270,6 +270,9 @@ namespace SabberStoneCoreAi
 							break;
 						}
 					}
+					//This is the end of the turn for player1
+					Console.WriteLine("#*#*#*#*#*#*#*#*##*##**#*#*#*#* Health of Player 1 at endofturn: " + game.CurrentPlayer.Hero.Health);
+				
 				}
 
 				// Random mode for Player 2
