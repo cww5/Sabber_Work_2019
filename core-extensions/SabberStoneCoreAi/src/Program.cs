@@ -243,9 +243,11 @@ namespace SabberStoneCoreAi
 
 			game.Process(ChooseTask.Mulligan(game.Player1, mulligan1));
 			game.Process(ChooseTask.Mulligan(game.Player2, mulligan2));
-
+			//Console.WriteLine("############" + game.Turn);
 			game.MainReady();
+			int cur_turn;
 
+			//CONNOR - Loop over all turns of the game
 			while (game.State != State.COMPLETE)
 			{
 				Console.WriteLine("");
@@ -253,13 +255,17 @@ namespace SabberStoneCoreAi
 								  $"ROUND {(game.Turn + 1) / 2} - {game.CurrentPlayer.Name}");
 				Console.WriteLine($"Hero[P1]: {game.Player1.Hero.Health} / Hero[P2]: {game.Player2.Hero.Health}");
 				Console.WriteLine("");
+				//CONNOR - Loop over all plays that Player 1 will make in a turn
 				while (game.State == State.RUNNING && game.CurrentPlayer == game.Player1)
 				{
 					Console.WriteLine($"* Calculating solutions *** Player 1 ***");
+					//CONNOR - Get all options for the next play for the turn
 					List<OptionNode> solutions = OptionNode.GetSolutions(game, game.Player1.Id, aiPlayer1, 10, 500);
 					var solution = new List<PlayerTask>();
+					//CONNOR - Sort plays by decreasing score. The First() one is the highest score
 					solutions.OrderByDescending(p => p.Score).First().PlayerTasks(ref solution);
 					Console.WriteLine($"- Player 1 - <{game.CurrentPlayer.Name}> ---------------------------");
+					//CONNOR - Execute all tasks in that play
 					foreach (PlayerTask task in solution)
 					{
 						Console.WriteLine(task.FullPrint());
@@ -271,10 +277,13 @@ namespace SabberStoneCoreAi
 						}
 					}
 					//This is the end of the turn for player1
-					Console.WriteLine("#*#*#*#*#*#*#*#*##*##**#*#*#*#* Health of Player 1 at endofturn: " + game.CurrentPlayer.Hero.Health);
-				
+					//Console.WriteLine(">>>Player 1 HEALTH at " + game.Turn + " is " + game.CurrentPlayer.Hero.Health);
 				}
+				//This is the end of the turn for player1
+				cur_turn = System.Convert.ToInt32(game.Turn);
+				Console.WriteLine(">>>Player 1 HEALTH at " + (cur_turn-1) + " is " + game.Player1.Hero.Health);
 
+				//CONNOR - Loop over all plays that Player 2 will make in a turn
 				// Random mode for Player 2
 				Console.WriteLine($"- Player 2 - <{game.CurrentPlayer.Name}> ---------------------------");
 				while (game.State == State.RUNNING && game.CurrentPlayer == game.Player2)
@@ -299,6 +308,9 @@ namespace SabberStoneCoreAi
 						}
 					}
 				}
+				//This is the end of the turn for player1
+				cur_turn = System.Convert.ToInt32(game.Turn);
+				Console.WriteLine(">>>Player 2 HEALTH at " + (cur_turn-1) + " is " + game.CurrentPlayer.Hero.Health);
 			}
 			Console.WriteLine($"Game: {game.State}, Player1: {game.Player1.PlayState} / Player2: {game.Player2.PlayState}");
 		}
