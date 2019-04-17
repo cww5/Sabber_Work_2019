@@ -310,7 +310,7 @@ namespace SabberStoneCoreAi
 				}
 				//This is the end of the turn for player1
 				cur_turn = System.Convert.ToInt32(game.Turn);
-				Console.WriteLine(">>>Player 2 HEALTH at " + (cur_turn-1) + " is " + game.CurrentPlayer.Hero.Health);
+				Console.WriteLine(">>>Player 2 HEALTH at " + (cur_turn-1) + " is " + game.Player2.Hero.Health);
 			}
 			Console.WriteLine($"Game: {game.State}, Player1: {game.Player1.PlayState} / Player2: {game.Player2.PlayState}");
 		}
