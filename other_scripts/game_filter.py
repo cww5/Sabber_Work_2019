@@ -54,18 +54,18 @@ log_file = False
 def parse_options():
     parser = argparse.ArgumentParser(description="Class for parsing game data")
     parser.add_argument('data_file', help='path to the data file')
-    parser.add_argument('-vb', '--verbose', action='store_true',help='set verbose logs')
-    parser.add_argument('--log', action='store_true',help='choice to log to file')
+    parser.add_argument('-vb', '--verbose', action='store_true', help='set verbose logs')
+    parser.add_argument('--log', action='store_true', help='choice to log to file')
     parser.add_argument('--sum', action='store_true', help='flag to print summary')
     parser.add_argument('--oth', action='store_true', help='flag to print other lines')
-    parser.add_argument('--ron', action='store_true',help='flag to print health_difs')
-    parser.add_argument('--end', action='store_true',help='flag to print end_turn health')
-    parser.add_argument('--blk', action='store_true',help='flag to print blocktypes')
+    parser.add_argument('--ron', action='store_true', help='flag to print health_difs')
+    parser.add_argument('--end', action='store_true', help='flag to print end_turn health')
+    parser.add_argument('--blk', action='store_true', help='flag to print blocktypes')
     ret_args = parser.parse_args()
     global debug
     if ret_args.verbose: debug = True
     global log_file
-    if ret_args.log: log_file = open("{}.txt".format(now),"a")
+    #if ret_args.log: log_file = open("{}.txt".format(now), "a")
     return ret_args
 
 class Game_Filter:
