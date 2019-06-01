@@ -6,7 +6,9 @@ Garrosh Hellscream, and then check in a given line in the name
 of the player with their atk/health is in the line
 
 
+2) Make a function that takes the data and forms a dataframe per game:
 
+turn number		P1_health	P2_health	health_difference
 
 
 
