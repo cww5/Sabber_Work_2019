@@ -45,7 +45,8 @@ Time: 4/3/2019 10:25:36 AM, Level: DEBUG, Location: Entity, Blocktype: TRIGGER, 
 Time: 4/3/2019 10:25:36 AM, Level: DEBUG, Location: Entity, Blocktype: TRIGGER, Text'Southsea Deckhand[28]' set data NUM_ATTACKS_THIS_TURN to 1
 Time: 4/3/2019 10:25:36 AM, Level: INFO, Location: AttackPhase, Blocktype: ATTACK, Text[AttackPhase]'Southsea Deckhand[28]'[ATK:2/HP:1] attacked 'Garrosh Hellscream[6]'[ATK:0/HP:28].
 '''
-
+import numpy as np
+import pandas as pd
 
 import re
 import argparse
@@ -54,119 +55,144 @@ debug = False
 log_file = False
 
 def parse_options():
-    parser = argparse.ArgumentParser(description="Class for parsing game data")
-    parser.add_argument('data_file', help='path to the data file')
-    parser.add_argument('-vb', '--verbose', action='store_true', help='set verbose logs')
-    parser.add_argument('--log', action='store_true', help='choice to log to file')
-    parser.add_argument('--sum', action='store_true', help='flag to print summary')
-    parser.add_argument('--oth', action='store_true', help='flag to print other lines')
-    parser.add_argument('--ron', action='store_true', help='flag to print health_difs')
-    parser.add_argument('--end', action='store_true', help='flag to print end_turn health')
-    parser.add_argument('--blk', action='store_true', help='flag to print blocktypes')
-    ret_args = parser.parse_args()
-    global debug
-    if ret_args.verbose: debug = True
-    global log_file
-    #if ret_args.log: log_file = open("{}.txt".format(now), "a")
-    return ret_args
+	parser = argparse.ArgumentParser(description="Class for parsing game data")
+	parser.add_argument('data_file', help='path to the data file')
+	parser.add_argument('-vb', '--verbose', action='store_true', help='set verbose logs')
+	parser.add_argument('--log', action='store_true', help='choice to log to file')
+	parser.add_argument('--sum', action='store_true', help='flag to print summary')
+	parser.add_argument('--oth', action='store_true', help='flag to print other lines')
+	parser.add_argument('--ron', action='store_true', help='flag to print health_difs')
+	parser.add_argument('--end', action='store_true', help='flag to print end_turn health')
+	parser.add_argument('--blk', action='store_true', help='flag to print blocktypes')
+	ret_args = parser.parse_args()
+	global debug
+	if ret_args.verbose: debug = True
+	global log_file
+	#if ret_args.log: log_file = open("{}.txt".format(now), "a")
+	return ret_args
 
 class Game_Filter:
-    '''class to filter key info from fullgame.txt'''
+	'''class to filter key info from fullgame.txt'''
 
-    def __init__(self, infile):
-        self.lines = []
-        with open(infile) as f:
-            for line in f:
-                self.lines.append(line.strip("\n"))
-        self.blocktypes = {}
-        self.healths = []
-        self.cur_round = []
-        self.end_turns = []
-        self.others = []
+	def __init__(self, infile):
+		self.lines = []
+		with open(infile) as f:
+			for line in f:
+				self.lines.append(line.strip("\n"))
+		self.blocktypes = {}
+		self.healths = []
+		self.cur_round = []
+		self.end_turns = []
+		self.others = []
+		self.df = pd.DataFrame(columns=['turn_no', 'p1_end_health', 'p2_end_health'])
 
-    def line_parser(self):
-        for i in range(len(self.lines)):
-            blockF, healthF, endturnF = False, False, False
-            line = self.lines[i]
-            prev = self.lines[i-1]
-            block_query = re.search("Blocktype: [A-Z]+", line)
-            if block_query != None:
-                blockF = True
-                #self.blocktypes[i] = block_query.group()
-                self.blocktypes[i] = line
+	def line_parser(self):
+		for i in range(len(self.lines)):
+			blockF, healthF, endturnF = False, False, False
+			line = self.lines[i]
+			prev = self.lines[i-1]
+			block_query = re.search("Blocktype: [A-Z]+", line)
+			if block_query != None:
+				blockF = True
+				#self.blocktypes[i] = block_query.group()
+				self.blocktypes[i] = line
 
-            health_query = re.search("Hero\[P1\]: [0-9]+ / Hero\[P2\]: [0-9]+", line)
-            if health_query != None:
-                healthF = True
-                cur = health_query.group().strip('\n')
-                health_list = [prev.strip('\n'), cur]
-                self.healths.append(health_list)
+			health_query = re.search("Hero\[P1\]: [0-9]+ / Hero\[P2\]: [0-9]+", line)
+			if health_query != None:
+				healthF = True
+				cur = health_query.group().strip('\n')
+				health_list = [prev.strip('\n'), cur]
+				self.healths.append(health_list)
 
-            endturn_query = re.search(">>>Player [0-9] HEALTH", line)
-            if endturn_query != None:
-                endturnF = True
-                end = line.strip("\n")
-                self.end_turns.append(end)
-                
-            if not blockF and not healthF and not endturnF:
-                self.others.append(line)
+			endturn_query = re.search(">>>Player [0-9] HEALTH", line)
+			if endturn_query != None:
+				endturnF = True
+				end = line.strip("\n")
+				self.end_turns.append(end)
 
-    def print_header(self, s):
-        for i in range(45):
-            print("_", end="")
-        print(s, end = "")
-        for i in range(45):
-            print("_", end="")
-        print()
-        
-    def print_summary(self):
-        self.print_header("SUMMARY")
-        print("Number of lines: {}".format(len(self.lines)))
-        print("Number of blocktypes: {}".format(len(self.blocktypes)))
-        print("Number of health declarations: {}".format(len(self.healths)))
-        print("Number of others: {}".format(len(self.others)))
-        
-    def print_rounds(self):
-        self.print_header("ROUNDS")
-        for l in self.healths:
-            #print(l[0])
-            print(l[1])
-        print()
-        #Hero[P1]: 30 / Hero[P2]: 30
+			if not blockF and not healthF and not endturnF:
+				self.others.append(line)
 
-    def print_others(self):
-        self.print_header("OTHERS")
-        for line in self.others:
-            print(line)
-        print()
+	def print_header(self, s):
+		for i in range(45):
+			print("_", end="")
+		print(s, end="")
+		for i in range(45):
+			print("_", end="")
+		print()
 
-    def print_blocktypes(self):
-        self.print_header("BLOCKTYPES")
-        for key in self.blocktypes:
-            print(key, self.blocktypes[key])
+	def print_summary(self):
+		self.print_header("SUMMARY")
+		print("Number of lines: {}".format(len(self.lines)))
+		print("Number of blocktypes: {}".format(len(self.blocktypes)))
+		print("Number of health declarations: {}".format(len(self.healths)))
+		print("Number of others: {}".format(len(self.others)))
 
-    def print_endturn_health(self):
-        self.print_header("ENDTURN_HEALTH")
-        for turn in self.end_turns:
-            print(turn)
+	def print_rounds(self):
+		self.print_header("ROUNDS")
+		for l in self.healths:
+			#print(l[0])
+			print(l[1])
+		print()
+		#Hero[P1]: 30 / Hero[P2]: 30
 
-    def print_options(self, arg_list):
-        if arg_list.sum:
-            self.print_summary()
-        if arg_list.end:
-            self.print_endturn_health()
-        if arg_list.ron:
-            self.print_rounds()
-        if arg_list.oth:
-            self.print_others()
-        if arg_list.blk:
-            self.print_blocktypes()
-            
+	def print_others(self):
+		self.print_header("OTHERS")
+		for line in self.others:
+			print(line)
+		print()
+
+	def print_blocktypes(self):
+		self.print_header("BLOCKTYPES")
+		for key in self.blocktypes:
+			print(key, self.blocktypes[key])
+
+	def process_endturn_health(self, p_flag):
+		'''
+		MAJOR PROBLEM HERE - turn number in DF is calculated manually. There
+		is an error in the text files with how the turn number is calculated.
+		Please check .sln file
+
+
+		:return:
+		'''
+		if p_flag: self.print_header("ENDTURN_HEALTH")
+		p1_health = '30'
+		p2_health = '30'
+		for turn_no in range(len(self.end_turns)):
+			turn = self.end_turns[turn_no]
+			parts = turn.split()
+			if turn_no %2 == 0:
+				p1_health = parts[-1]
+			else:
+				p2_health = parts[-1]
+
+			row = {'turn_no':turn_no+1, 'p1_end_health':p1_health, 'p2_end_health':p2_health}
+			self.df = self.df.append(row, ignore_index=True)
+			if p_flag: print(turn_no, turn)
+
+	def print_options(self, arg_list):
+		if arg_list.sum:
+			self.print_summary()
+		self.process_endturn_health(arg_list.end)
+		if arg_list.ron:
+			self.print_rounds()
+		if arg_list.oth:
+			self.print_others()
+		if arg_list.blk:
+			self.print_blocktypes()
+
+
+def main():
+	args = parse_options()
+	# C:\Users\watson\Desktop\fullgame01_060219.txt
+	game_name = args.data_file
+	game_obj = Game_Filter(game_name)
+	game_obj.line_parser()
+	game_obj.print_options(args)
+	print(game_obj.df)
+
+
 if __name__ == "__main__":
-    args = parse_options()
-    #'fullgame01_040319.txt'
-    game_name = args.data_file
-    game_obj = Game_Filter(game_name)
-    game_obj.line_parser()
-    game_obj.print_options(args)
-    
+	main()
+

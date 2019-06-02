@@ -35,8 +35,8 @@ namespace SabberStoneCoreAi
 			Console.WriteLine("Starting test setup.");
 
 			//OneTurn();
-			//FullGame();
-			RandomGames();
+			FullGame();
+			//RandomGames();
 			//TestFullGames();
 
 			Console.WriteLine("Test end!");
