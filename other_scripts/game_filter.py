@@ -16,8 +16,6 @@ turn number		P1_health	P2_health	health_difference
 
 
 
-
-
 Player1: PLAYING / Player2: PLAYING - ROUND 2 - WARRIOR Player1
 Hero[P1]: 30 / Hero[P2]: 30
 
