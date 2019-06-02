@@ -35,8 +35,8 @@ namespace SabberStoneCoreAi
 			Console.WriteLine("Starting test setup.");
 
 			//OneTurn();
-			FullGame();
-			//RandomGames();
+			//FullGame();
+			RandomGames();
 			//TestFullGames();
 
 			Console.WriteLine("Test end!");
@@ -144,7 +144,7 @@ namespace SabberStoneCoreAi
 				{
 					List<PlayerTask> options = game.CurrentPlayer.Options();
 					PlayerTask option = options[Rnd.Next(options.Count)];
-					//Console.WriteLine(option.FullPrint());
+					Console.WriteLine(option.FullPrint()); //CONNOR - This suppresses the full print of the task 
 					game.Process(option);
 
 
