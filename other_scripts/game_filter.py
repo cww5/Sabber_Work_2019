@@ -45,29 +45,39 @@ Time: 4/3/2019 10:25:36 AM, Level: INFO, Location: AttackPhase, Blocktype: ATTAC
 '''
 import numpy as np
 import pandas as pd
+import matplotlib
+import matplotlib.pyplot
 
 import re
 import argparse
+import logging
 
-debug = False
-log_file = False
 
 def parse_options():
 	parser = argparse.ArgumentParser(description="Class for parsing game data")
 	parser.add_argument('data_file', help='path to the data file')
-	parser.add_argument('-vb', '--verbose', action='store_true', help='set verbose logs')
-	parser.add_argument('--log', action='store_true', help='choice to log to file')
 	parser.add_argument('--sum', action='store_true', help='flag to print summary')
 	parser.add_argument('--oth', action='store_true', help='flag to print other lines')
 	parser.add_argument('--ron', action='store_true', help='flag to print health_difs')
 	parser.add_argument('--end', action='store_true', help='flag to print end_turn health')
 	parser.add_argument('--blk', action='store_true', help='flag to print blocktypes')
+	parser.add_argument('--log_file', help='file to store logs')
+	parser.add_argument('-vb', '--verbose', action='store_true', help='turn on verbose logs for debugging')
 	ret_args = parser.parse_args()
-	global debug
-	if ret_args.verbose: debug = True
-	global log_file
-	#if ret_args.log: log_file = open("{}.txt".format(now), "a")
+
+	log_fmt = '%(asctime)s LINE:%(lineno)d LEVEL:%(levelname)s %(message)s'
+	if ret_args.verbose:
+		log_lvl = logging.DEBUG
+	else:
+		log_lvl = logging.INFO
+
+	if ret_args.log_file is not None:
+		log_file = ret_args.log_file
+		logging.basicConfig(level=log_lvl, filename=log_file, format = log_fmt)
+	else:
+		logging.basicConfig(level=log_lvl, format=log_fmt)
 	return ret_args
+
 
 class Game_Filter:
 	'''class to filter key info from fullgame.txt'''
@@ -88,11 +98,11 @@ class Game_Filter:
 		for i in range(len(self.lines)):
 			blockF, healthF, endturnF = False, False, False
 			line = self.lines[i]
-			prev = self.lines[i-1]
+			prev = self.lines[i - 1]
 			block_query = re.search("Blocktype: [A-Z]+", line)
 			if block_query != None:
 				blockF = True
-				#self.blocktypes[i] = block_query.group()
+				# self.blocktypes[i] = block_query.group()
 				self.blocktypes[i] = line
 
 			health_query = re.search("Hero\[P1\]: [0-9]+ / Hero\[P2\]: [0-9]+", line)
@@ -113,37 +123,38 @@ class Game_Filter:
 
 	def print_header(self, s):
 		for i in range(45):
-			print("_", end="")
-		print(s, end="")
+			logging.info("_", end="")
+		logging.info(s, end="")
 		for i in range(45):
-			print("_", end="")
-		print()
+			logging.info("_", end="")
+		logging.info()
 
 	def print_summary(self):
 		self.print_header("SUMMARY")
-		print("Number of lines: {}".format(len(self.lines)))
-		print("Number of blocktypes: {}".format(len(self.blocktypes)))
-		print("Number of health declarations: {}".format(len(self.healths)))
-		print("Number of others: {}".format(len(self.others)))
+		logging.info("Number of lines: {}".format(len(self.lines)))
+		logging.info("Number of blocktypes: {}".format(len(self.blocktypes)))
+		logging.info("Number of health declarations: {}".format(len(self.healths)))
+		logging.info("Number of others: {}".format(len(self.others)))
 
 	def print_rounds(self):
 		self.print_header("ROUNDS")
 		for l in self.healths:
-			#print(l[0])
-			print(l[1])
-		print()
-		#Hero[P1]: 30 / Hero[P2]: 30
+			# logging.info(l[0])
+			logging.info(l[1])
+		logging.info()
+
+	# Hero[P1]: 30 / Hero[P2]: 30
 
 	def print_others(self):
 		self.print_header("OTHERS")
 		for line in self.others:
-			print(line)
-		print()
+			logging.info(line)
+		logging.info()
 
 	def print_blocktypes(self):
 		self.print_header("BLOCKTYPES")
 		for key in self.blocktypes:
-			print(key, self.blocktypes[key])
+			logging.info(key, self.blocktypes[key])
 
 	def process_endturn_health(self, p_flag):
 		'''
@@ -160,14 +171,14 @@ class Game_Filter:
 		for turn_no in range(len(self.end_turns)):
 			turn = self.end_turns[turn_no]
 			parts = turn.split()
-			if turn_no %2 == 0:
+			if turn_no % 2 == 0:
 				p1_health = parts[-1]
 			else:
 				p2_health = parts[-1]
 
-			row = {'turn_no':turn_no+1, 'p1_end_health':p1_health, 'p2_end_health':p2_health}
+			row = {'turn_no': turn_no + 1, 'p1_end_health': p1_health, 'p2_end_health': p2_health}
 			self.df = self.df.append(row, ignore_index=True)
-			if p_flag: print(turn_no, turn)
+			if p_flag: logging.info(turn_no, turn)
 
 	def print_options(self, arg_list):
 		if arg_list.sum:
@@ -184,13 +195,15 @@ class Game_Filter:
 def main():
 	args = parse_options()
 	# C:\Users\watson\Desktop\fullgame01_060219.txt
+	logging.debug(f'Matplotlib: {matplotlib.__version__}')
+	logging.debug(f'Numpy: {np.__version__}')
+	logging.debug(f'Pandas: {pd.__version__}')
 	game_name = args.data_file
 	game_obj = Game_Filter(game_name)
 	game_obj.line_parser()
 	game_obj.print_options(args)
-	print(game_obj.df)
+	logging.info('\n{}'.format(game_obj.df))
 
 
 if __name__ == "__main__":
 	main()
-
