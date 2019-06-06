@@ -46,7 +46,7 @@ Time: 4/3/2019 10:25:36 AM, Level: INFO, Location: AttackPhase, Blocktype: ATTAC
 import numpy as np
 import pandas as pd
 import matplotlib
-import matplotlib.pyplot
+import matplotlib.pyplot as plt
 
 import re
 import argparse
@@ -92,7 +92,7 @@ class Game_Filter:
 		self.cur_round = []
 		self.end_turns = []
 		self.others = []
-		self.df = pd.DataFrame(columns=['turn_no', 'p1_end_health', 'p2_end_health'])
+		self.df = pd.DataFrame(columns=['turn_no', 'p1_end_health', 'p2_end_health', 'health_dif'])
 
 	def line_parser(self):
 		for i in range(len(self.lines)):
@@ -166,17 +166,18 @@ class Game_Filter:
 		:return:
 		'''
 		if p_flag: self.print_header("ENDTURN_HEALTH")
-		p1_health = '30'
-		p2_health = '30'
+		p1_health = 30
+		p2_health = 30
 		for turn_no in range(len(self.end_turns)):
 			turn = self.end_turns[turn_no]
 			parts = turn.split()
 			if turn_no % 2 == 0:
-				p1_health = parts[-1]
+				p1_health = int(parts[-1])
 			else:
-				p2_health = parts[-1]
+				p2_health = int(parts[-1])
+			dif = p1_health - p2_health
 
-			row = {'turn_no': turn_no + 1, 'p1_end_health': p1_health, 'p2_end_health': p2_health}
+			row = {'turn_no': turn_no + 1, 'p1_end_health': p1_health, 'p2_end_health': p2_health, 'health_dif': dif}
 			self.df = self.df.append(row, ignore_index=True)
 			if p_flag: logging.info(turn_no, turn)
 
@@ -191,6 +192,20 @@ class Game_Filter:
 		if arg_list.blk:
 			self.print_blocktypes()
 
+	def plot_data(self):
+		plt.figure()
+		x = self.df.turn_no
+		y = self.df.health_dif
+		y1 = self.df.p1_end_health
+		y2 = self.df.p2_end_health
+		plt.plot(x, y, label='P1-P2', color='grey')
+		plt.plot(x, y1, label='P1', color='red')
+		plt.plot(x, y2, label='P2', color='blue')
+		plt.title('Health Difference Player1-Player2')
+		plt.legend(loc='upper right')
+		plt.xlabel('Turn Num')
+		plt.ylabel('Health Dif')
+		plt.show()
 
 def main():
 	args = parse_options()
@@ -203,6 +218,7 @@ def main():
 	game_obj.line_parser()
 	game_obj.print_options(args)
 	logging.info('\n{}'.format(game_obj.df))
+	game_obj.plot_data()
 
 
 if __name__ == "__main__":
