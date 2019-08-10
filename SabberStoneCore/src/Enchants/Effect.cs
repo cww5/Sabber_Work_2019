@@ -50,7 +50,7 @@ namespace SabberStoneCore.Enchants
 		public readonly int Value;
 
 		/// <summary>
-		/// Create a new Effect. An Effect consists of <see cref="GameTag"/>, <see cref="EffectOperator"/>, and <see cref="int"/> value.
+		/// Create a new Effect. An Effect consists of <see cref="GameTag"/>, <see cref="EffectOperator"/>, and <see cref="Int32"/> value.
 		/// </summary>
 		/// <param name="tag">The <see cref="GameTag"/> to be affected.</param>
 		/// <param name="operator">The operation this effect performs.</param>
@@ -304,7 +304,7 @@ namespace SabberStoneCore.Enchants
 		{
 			unchecked
 			{
-				var hashCode = (int) Tag;
+				int hashCode = (int) Tag;
 				hashCode = (hashCode * 397) ^ (int) Operator;
 				hashCode = (hashCode * 397) ^ Value;
 				return hashCode;
